@@ -16,15 +16,20 @@ app.use(express.urlencoded({ extended: true}))
 respond = (status, message, data) => new Object({ status, message, data });
 
 const port = process.env.PORT;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log("Listening on", port);
 });
+
+const socketServer = require('./socket/SocketServer.js');
+socketServer(server);
 
 const surveyAPI = require('./api/SurveyAPI.js');
 app.use('/survey', surveyAPI);
 
-const socketServer = require('./socket/SocketServer.js');
-socketServer(app);
+
+app.get('/ping', (req, res) => {
+  res.send(respond(0, "pong", null));
+});
 
 app.get('/', (req, res) => {
   res.send(respond(0, "HOME ROOT", null))

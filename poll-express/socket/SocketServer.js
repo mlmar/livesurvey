@@ -1,6 +1,6 @@
 const { v4 } = require('uuid');
 const ws = require('ws');
-const rooms = require('../util/RoomUtil.js');
+const roomUtil = require('../util/RoomUtil.js');
 
 
 
@@ -30,7 +30,6 @@ const handleConnection = (socket) => {
   socket.id = id;
   CLIENTS.set(id, socket);
   console.log('Client',`[${socket.id}]`, 'connected to server');
-  to(socket, 'SET_ID', id);
 }
 
 const handleMessage = (socket, data) => {
@@ -43,34 +42,26 @@ const handleMessage = (socket, data) => {
 const handleClose = (socket) => {
   const { room, id } = socket;
   console.log('Client', `[${id}]`, 'disconnected');
-  const users = rooms.leave(room, id)
-  broadcast(users, 'SET_USERS', users);
-
-  const game = games.get(room)?.refreshHost(id, users);
-  if(game) {
-    games.get(room).deletePlayer(socket.id);
-    broadcast(users, 'GAME_UPDATE', games.info(room));
-  } else {
-    games.remove(room);
-  }
-  
-  rooms.print();
+  roomUtil.print();
 }
 
 
 
 /*** message listeners ***/
 
-listen('JOIN_ROOM', (socket, payload) => {
-  socket.room = payload.room;
-  const users = rooms.join(payload.room, socket.id, payload);
-  broadcast(users, 'SET_USERS', users);
-  
-  const game = games.create(socket.room, socket.id);
-  if(!game.inProgress) games.get(socket.room).setPlayers(users);
-  broadcast(users, 'GAME_UPDATE', game)
+listen('CREATE_SURVEY', (socket, payload) => {
+  if(!payload.title || !payload.questions) {
+    console.log("Missing survey data")
+    return;
+  }
 
-  rooms.print();
+  const id = roomUtil.create(socket.id, payload);
+  console.log("Creating survey", id);
+  to(socket, 'SET_SURVEY_ID', id);
+});
+
+listen('JOIN_SURVEY', (socket, payload) => {
+  socket.room = payload.room;
 });
 
 /*
@@ -79,6 +70,7 @@ listen('JOIN_ROOM', (socket, payload) => {
     - reads all incoming connections, messages and closes connections
 */
 const init = (server) => {
+  console.log("Initializing socket server");
   const wsServer = new ws.Server({ server });
   wsServer.on('connection', (socket) => {
     handleConnection(socket);

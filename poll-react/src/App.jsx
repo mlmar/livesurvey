@@ -1,8 +1,11 @@
-import { useReducer } from 'react';
+import { useReducer, useEffect } from 'react';
 import './css/main.css'
 import styles from './js/util/StyleUtil';
+import useConnection from './js/hooks/useConnection.jsx';
+import SocketWrapper from './js/components/socket/SocketWrapper.jsx'
 import Create from './js/components/create/Create.jsx';
-
+import Survey from './js/components/survey/Survey';
+import socketUtil from './js/util/SocketUtil';
 
 const reducer = (state, action) => {
   const { type, value } = action;
@@ -10,11 +13,14 @@ const reducer = (state, action) => {
     case "setNavIndex": {
       return { ...state, navIndex: value }
     }
-    case "setLoading": {
-      return { ...state, loading: value }
-    }
     case "setSurveyCode": {
       return { ...state, surveyCode: value }
+    }
+    case "joinSurvey": {
+      return { ...state, surveyCode: value, navIndex: 1 }
+    }
+    case "setQuestion": {
+      return { ...state, question: value}
     }
     default: return { ... state };
   }
@@ -22,8 +28,8 @@ const reducer = (state, action) => {
 
 const initialState = {
   navIndex: 0,
-  loading: false,
-  surveyCode: ""
+  surveyCode: "",
+  question: null
 }
 
 /*
@@ -32,17 +38,28 @@ const initialState = {
 */
 const App = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { navIndex, loading, surveyCode } = state;
+  const { navIndex, surveyCode, question } = state;
+
+  const connectionStatus = useConnection();
+
+  useEffect(() => {
+    socketUtil.listen('SET_SURVEY_ID', ({ id }) => dispatch({ type: 'joinSurvey', value: id }));
+  }, [])
+
+  useEffect(() => {
+    socketUtil.listen('SET_QUESTION', (q) => dispatch({ type: 'setQuestion', value: q }));
+  }, [])
+
 
   const getOptions = () => {
     const handleClick = (event) => dispatch({ type: "setNavIndex", value: parseInt(event.currentTarget.id)});
     return (
       <div className={styles.panel + "items-center"}>
         <input 
-          className={styles.textCenter + "text-center w-60 mb-2"} 
+          className={styles.textCenter + "w-60 mb-2"} 
           placeholder="Survey Code" 
           value={surveyCode}
-          onChange={(event) => dispatch({ type: "setSurveyCode", value: event.currentTarget.value })}
+          onChange={(event) => dispatch({ type: "setSurveyCode", value: event.currentTarget.value.toUpperCase() })}
         />
         <button className={styles.button.blue} id={1} onClick={handleClick} disabled={surveyCode.length === 0}> Join by Code </button>
         <label className={styles.label + "mt-5 mb-5"}> or </label>
@@ -52,12 +69,24 @@ const App = () => {
   }
   
   const getContent = (index) => {
+    if(!connectionStatus) return <label className={styles.textCenter}> No connection </label>
+    if(connectionStatus === 1) return <label className={styles.textCenter}> Connecting </label>
+
+    let content = null;
     switch(index) {
-      case 2: return <Create/>
-      default: return getOptions();
+      case 1:
+        content = <Survey question={question}/>
+      case 2: 
+        content = <Create/>
+        break;
+      default:
+        content = getOptions();
+        break;
     }
+
+    return <SocketWrapper> {content} </SocketWrapper>
   }
-  
+
   return (
     <div className="app items-center bg-gray-50 py-16">
       {getContent(navIndex)}

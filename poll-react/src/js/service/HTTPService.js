@@ -1,5 +1,6 @@
 class HTTPService {
   async get(endpoint) {
+
     try {
       const response = await fetch(endpoint, {
         method: 'get',

@@ -7,4 +7,5 @@ router.get('/', (req, res) => {
 });
 
 router.get('/create', (req, res) => {
+  const id = roomUtil.create()
 });

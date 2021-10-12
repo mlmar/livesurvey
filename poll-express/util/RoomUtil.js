@@ -1,13 +1,12 @@
-const { v4 } = require('uuid');
 const ROOMS = new Map();
 
 class Room {
-  constructor(id) {
+  constructor(id, host, survey) {
     this.id = id;
-    this.host = null;
-    this.title = "";
-    this.questions = [];
-    this.votes = null;
+    this.host = host;
+    this.title = survey.title;
+    this.questions = survey.questions;
+    this.votes = survey.questions.map((question) => [...question.answers].fill(0));
     this.index = 0;
     this.interval = null;
     this.polling = false;
@@ -23,12 +22,6 @@ class Room {
 
   getHost() {
     return this.host;
-  }
-
-  setSurvey(survey) {
-    this.title = survey.title;
-    this.questions = survey.questions;
-    this.votes = this.questions.map((question) => [...question.answers].fill(0));
   }
 
   getCurrentQuestion() {
@@ -79,15 +72,27 @@ class Room {
   }
 }
 
-const create = (survey) => {
-  const id = v4();
-  ROOMS.set(id, new Room(id));
+// random 5 letter id
+const randomID = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for(var i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+const create = (host, survey) => {
+  const id = randomID();
+  ROOMS.set(id, new Room(id, host, survey));
   return id;
 }
 
 const remove = (room) => {
   ROOMS.delete(room);
 }
+
+
 
 const get = (room) => {
   return ROOMS.get(room);
