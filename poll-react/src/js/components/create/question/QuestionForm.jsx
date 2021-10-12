@@ -1,5 +1,6 @@
 import { useReducer } from 'react';
 import AnswerForm from './AnswerForm';
+import useFocus from '../../../hooks/useFocus';
 import styles from "../../../util/StyleUtil";
 
 const initialState = { question: "", answers: [], tentativeAnswer: "" };
@@ -37,8 +38,9 @@ const QuestionForm = ({ onSubmit }) => {
   const [state, dispatch] = useReducer(questionFormReducer, initialState);
   const { question, answers, tentativeAnswer } = state;
 
+
   const handleSubmitQuestion = () => {
-    if(onSubmit) onSubmit(state);
+    if(onSubmit) onSubmit({ question, answers });
     dispatch({ type: "resetForm" });
   }
   const handleChangeQuestion = (event) => dispatch({ type: "setQuestion", value: event.currentTarget.value });
@@ -48,15 +50,19 @@ const QuestionForm = ({ onSubmit }) => {
   const handleChangeTentativeAnswer = (value) => dispatch({ type: "setTentativeAnswer", value });
   const handleSubmitTentativeAnswer = (value) => dispatch({ type: "addAnswer", value });
 
+  const questionRef = useFocus([question]); // focus question input when reset
+
   return (
     <div className="flex-col border border-solid border-gray-300 px-6 py-4">
-      <label className={styles.label}> Add a question </label>
       <input 
         className={styles.text + "mb-2"} 
         type="text" 
         placeholder="Question" 
         value={question} 
         onChange={handleChangeQuestion}
+        tabIndex={1}
+        autoFocus
+        ref={questionRef}
       />
 
       { answers.length > 0 && answers.map((value, i) => (
@@ -75,9 +81,15 @@ const QuestionForm = ({ onSubmit }) => {
         value={tentativeAnswer}
         onChange={handleChangeTentativeAnswer}
         onSubmit={handleSubmitTentativeAnswer}
+        tabIndex={2}
       />
       <span className="flex justify-end">
-        <button className={styles.button.blue} onClick={handleSubmitQuestion}> Add </button>
+        <button 
+          className={styles.button.blue} 
+          onClick={handleSubmitQuestion} 
+          tabIndex={3} 
+          disabled={answers.length === 0}
+        > Add Question </button>
       </span>
     </div>
   )
