@@ -1,0 +1,4 @@
+poll-react/node_modules
+poll-express/node_modules
+poll-express/.env
+.vscode
