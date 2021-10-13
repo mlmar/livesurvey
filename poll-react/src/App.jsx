@@ -5,22 +5,29 @@ import useConnection from './js/hooks/useConnection.jsx';
 import SocketWrapper from './js/components/socket/SocketWrapper.jsx'
 import Create from './js/components/create/Create.jsx';
 import Survey from './js/components/survey/Survey';
-import socketUtil from './js/util/SocketUtil';
+import socketUtil, { client } from './js/util/SocketUtil';
 
 const reducer = (state, action) => {
-  const { type, value } = action;
+  const { type, payload } = action;
   switch(type) {
     case "setNavIndex": {
-      return { ...state, navIndex: value }
+      return { ...state, navIndex: payload.navIndex };
     }
-    case "setSurveyCode": {
-      return { ...state, surveyCode: value }
+    case "setSurveyID": {
+      return { ...state, surveyID: payload.surveyID };
     }
     case "joinSurvey": {
-      return { ...state, surveyCode: value, navIndex: 1 }
+      client.emit('JOIN_SURVEY', { surveyID: state.surveyID });
+      return { ...state, navIndex: 1 };
     }
-    case "setQuestion": {
-      return { ...state, question: value}
+    case "setHost": {
+      return { ...state, host: true };
+    }
+    case "createSurvey": {
+      return { ...state, host: true, surveyID: payload.surveyID, navIndex: 1 }
+    }
+    case "reset": {
+      return { ...initialState };
     }
     default: return { ... state };
   }
@@ -28,8 +35,8 @@ const reducer = (state, action) => {
 
 const initialState = {
   navIndex: 0,
-  surveyCode: "",
-  question: null
+  surveyID: "",
+  host: false
 }
 
 /*
@@ -38,58 +45,65 @@ const initialState = {
 */
 const App = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { navIndex, surveyCode, question } = state;
+  const { navIndex, surveyID, host } = state;
 
   const connectionStatus = useConnection();
 
   useEffect(() => {
-    socketUtil.listen('SET_SURVEY_ID', ({ id }) => dispatch({ type: 'joinSurvey', value: id }));
+    socketUtil.listen('CREATE_SURVEY', (id) => dispatch({ type: "createSurvey", payload: { id } }))
   }, [])
-
-  useEffect(() => {
-    socketUtil.listen('SET_QUESTION', (q) => dispatch({ type: 'setQuestion', value: q }));
-  }, [])
-
 
   const getOptions = () => {
-    const handleClick = (event) => dispatch({ type: "setNavIndex", value: parseInt(event.currentTarget.id)});
     return (
       <div className={styles.panel + "items-center"}>
         <input 
           className={styles.textCenter + "w-60 mb-2"} 
           placeholder="Survey Code" 
-          value={surveyCode}
-          onChange={(event) => dispatch({ type: "setSurveyCode", value: event.currentTarget.value.toUpperCase() })}
+          value={surveyID}
+          onChange={(event) => dispatch({ type: "setSurveyID", payload: { surveyID: event.currentTarget.value.toUpperCase() }})}
         />
-        <button className={styles.button.blue} id={1} onClick={handleClick} disabled={surveyCode.length === 0}> Join by Code </button>
+        <button 
+          className={styles.button.blue} 
+          onClick={() => dispatch({ type: "joinSurvey" })} 
+          disabled={surveyID.length === 0}
+        > Join by Code </button>
         <label className={styles.label + "mt-5 mb-5"}> or </label>
-        <button className={styles.button.green} id={2} onClick={handleClick} disabled={surveyCode.length > 0}> Create Survey </button>
+        <button 
+          className={styles.button.green}
+          onClick={() => dispatch({ type: "setNavIndex", payload: { navIndex: 2 }})} 
+          disabled={surveyID.length > 0}
+        > Create Survey </button>
       </div>
     )
   }
-  
-  const getContent = (index) => {
+
+  const getContent = () => {
+    switch(navIndex) {
+      case 1:
+        return <Survey host={host}/>
+      case 2: 
+        return <Create/>
+      default:
+        return getOptions();
+    }
+  }
+
+  const getConnectionLabels = () => {
     if(!connectionStatus) return <label className={styles.textCenter}> No connection </label>
     if(connectionStatus === 1) return <label className={styles.textCenter}> Connecting </label>
-
-    let content = null;
-    switch(index) {
-      case 1:
-        content = <Survey question={question}/>
-      case 2: 
-        content = <Create/>
-        break;
-      default:
-        content = getOptions();
-        break;
-    }
-
-    return <SocketWrapper> {content} </SocketWrapper>
   }
+  
 
   return (
     <div className="app items-center bg-gray-50 py-16">
-      {getContent(navIndex)}
+      { connectionStatus == 2 ? (
+          <SocketWrapper>
+            {getContent()}
+          </SocketWrapper>
+        ) : (
+          getConnectionLabels()
+        )
+      }
     </div>
   )
 }

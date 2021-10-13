@@ -24,7 +24,7 @@ const AnswerForm = ({ type, index, value, onChange, onSubmit, disabled, tabIndex
   return (
     <form className="flex items-center mb-2" onSubmit={handleSubmit}>
       { type === "add" ?
-        <button className={blueButton} type="submit"> + </button>
+        <button className={blueButton} type="submit" disabled={value.length === 0}> + </button>
         :
         <button className={redButton} type="submit"> - </button>
       }

@@ -4,10 +4,13 @@ class Room {
   constructor(id, host, survey) {
     this.id = id;
     this.host = host;
+    this.users = new Set();
+
     this.title = survey.title;
     this.questions = survey.questions;
     this.votes = survey.questions.map((question) => [...question.answers].fill(0));
     this.index = 0;
+
     this.interval = null;
     this.polling = false;
   }
@@ -22,6 +25,18 @@ class Room {
 
   getHost() {
     return this.host;
+  }
+
+  addUser(user) {
+    this.users.add(user);
+  }
+
+  removeUser(user) {
+    this.users.delete(user);
+  }
+
+  getUsers() {
+    return Array.from(this.users);
   }
 
   getCurrentQuestion() {

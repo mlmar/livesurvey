@@ -42,6 +42,7 @@ const handleMessage = (socket, data) => {
 const handleClose = (socket) => {
   const { room, id } = socket;
   console.log('Client', `[${id}]`, 'disconnected');
+  roomUtil.get(room).removeUser(id);
   roomUtil.print();
 }
 
@@ -57,11 +58,13 @@ listen('CREATE_SURVEY', (socket, payload) => {
 
   const id = roomUtil.create(socket.id, payload);
   console.log("Creating survey", id);
-  to(socket, 'SET_SURVEY_ID', id);
+  to(socket, 'CREATE_SURVEY', id);
 });
 
 listen('JOIN_SURVEY', (socket, payload) => {
-  socket.room = payload.room;
+  socket.room = payload.surveyID;
+  roomUtil.get(payload.surveyID).addUser(socket.id);
+  roomUtil.print();
 });
 
 /*
