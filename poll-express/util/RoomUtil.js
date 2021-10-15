@@ -39,18 +39,29 @@ class Room {
     return Array.from(this.users);
   }
 
+  getSurvey() {
+    return { 
+      quesitons: this.questions,
+      index: this.index
+    }
+  }
+
   getCurrentQuestion() {
     return this.questions[this.current];
   }
 
-  getPrevQuestion() {
+  prevQuestion() {
     if(this.current > 0) this.current--;
-    return this.questions[this.current]
+    return this.getCurrentQuestion();
   }
 
-  getNextQuestion() {
+  nextQuestion() {
     if(this.current < this.questions.length - 1) this.current++;
-    return this.questions[this.current];
+    return this.getCurrentQuestion();
+  }
+
+  getIndex() {
+    return this.index;
   }
 
   vote(voteIndex) {
@@ -77,7 +88,7 @@ class Room {
   startInterval(callback, time) {
     if(this.interval) return;
     this.interval = setInterval(() => {
-      callback(votes);
+      callback(this.votes);
     }, time);
   }
 

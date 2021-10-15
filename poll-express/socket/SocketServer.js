@@ -11,10 +11,10 @@ const LISTENERS = {};
 const listen = (action, func) => LISTENERS[action] = func;
 
 // broadcasts to all users in an array
-const broadcast = (users, action, payload) => {
+const broadcast = (sockets, action, payload) => {
   const message = JSON.stringify({ action, payload });
-  users?.forEach((u) => {
-    CLIENTS.get(u.id).send(message);
+  sockets?.forEach((id) => {
+    CLIENTS.get(id).send(message);
   });
 }
 
@@ -42,7 +42,7 @@ const handleMessage = (socket, data) => {
 const handleClose = (socket) => {
   const { room, id } = socket;
   console.log('Client', `[${id}]`, 'disconnected');
-  roomUtil.get(room).removeUser(id);
+  if(roomUtil.get(room)) roomUtil.get(room).removeUser(id);
   roomUtil.print();
 }
 
@@ -57,15 +57,54 @@ listen('CREATE_SURVEY', (socket, payload) => {
   }
 
   const id = roomUtil.create(socket.id, payload);
-  console.log("Creating survey", id);
+  socket.room = id;
   to(socket, 'CREATE_SURVEY', id);
+  console.log("Creating survey", id);
 });
 
 listen('JOIN_SURVEY', (socket, payload) => {
-  socket.room = payload.surveyID;
-  roomUtil.get(payload.surveyID).addUser(socket.id);
+  const { surveyID } = payload;
+  const roomObj = roomUtil.get(surveyID);
+  if(!roomObj) return;
+  socket.room = surveyID;
+  roomObj.addUser(socket.id);
   roomUtil.print();
+  console.log("Client", `[${socket.id}]`, "joined room", payload.surveyID)
 });
+
+listen('START_INTERVAL', (socket) => {
+  const { room, id } = socket;
+  const roomObj = roomUtil.get(room);
+  if(!roomObj && roomObj.getHost() !==  id) return;
+  roomObj.startInterval((votes) => {
+    to(socket, 'SET_VOTES', votes);
+    broadcast([...roomObj.getUsers(), id], 'SET_SURVEY', roomObj.getSurvey());
+  }, 300);
+});
+
+listen('SET_QUESTION', (socket, payload) => {
+  const { room, id } = socket;
+  const { type } = payload;
+  const roomObj = roomUtil.get(room);
+  if(!roomObj && roomObj.getHost() !==  id) return;
+  if(type === "next") {
+    roomObj.nextQuestion()
+  } else if(type === "prev") {
+    roomObj.prevQuestion();
+  }
+});
+
+listen('SET_POLLING', (socket, payload) => {
+  const { room, id } = socket;
+  const { paused } = payload;
+  const roomObj = roomUtil.get(room);
+  if(!roomObj && roomObj.getHost() !==  id) return;
+  if(paused) {
+    roomObj.stopPolling();
+  } else {
+    roomObj.startPolling();
+  }
+})
 
 /*
   socket event initialization function

@@ -1,5 +1,5 @@
 import styles from "../../../util/StyleUtil";
-const blueButton = styles.hover.blue + "flex items-center justify-center text-gray-50 font-bold rounded-full bg-blue-400 w-6 h-6 mx-2";
+const blueButton = styles.hover.blue + styles.disabled.blue + "flex items-center justify-center text-gray-50 font-bold rounded-full bg-blue-400 w-6 h-6 mx-2";
 const redButton = styles.hover.red + "flex items-center justify-center text-gray-50 font-bold rounded-full bg-red-400 w-6 h-6 mx-2";
 
 /*
