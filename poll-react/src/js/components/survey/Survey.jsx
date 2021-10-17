@@ -7,6 +7,8 @@ const Survey = ({ host }) => {
   const [survey, setSurvey] = useState({ questions: null, index: 0 });
   const [disabled, setDisabled] = useState(false);
 
+  const { questions, index } = survey;
+
   // add listeners
   useEffect(() => {
     socketUtil.listen('SET_SURVEY', setSurvey);
@@ -19,7 +21,7 @@ const Survey = ({ host }) => {
   }, []);
 
   if(!host) {
-    return <SurveyAnswers disabled={disabled}/>
+    return <SurveyAnswers {...questions?.[index]} disabled={disabled}/>
   }
 
   return <SurveyControls {...survey}/>

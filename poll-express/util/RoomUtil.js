@@ -41,22 +41,22 @@ class Room {
 
   getSurvey() {
     return { 
-      quesitons: this.questions,
+      questions: this.questions,
       index: this.index
     }
   }
 
   getCurrentQuestion() {
-    return this.questions[this.current];
+    return this.questions[this.index];
   }
 
   prevQuestion() {
-    if(this.current > 0) this.current--;
+    if(this.index > 0) this.index--;
     return this.getCurrentQuestion();
   }
 
   nextQuestion() {
-    if(this.current < this.questions.length - 1) this.current++;
+    if(this.index < this.questions.length - 1) this.index++;
     return this.getCurrentQuestion();
   }
 

@@ -54,10 +54,10 @@ const QuestionForm = ({ onSubmit }) => {
 
   return (
     <div className="flex-col border border-solid border-gray-300 px-6 py-4">
-      <input 
+      <textarea 
         className={styles.text + "mb-2"} 
-        type="text" 
         placeholder="Question" 
+        rows="3"
         value={question} 
         onChange={handleChangeQuestion}
         tabIndex={1}

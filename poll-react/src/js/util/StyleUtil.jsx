@@ -3,7 +3,6 @@ const text = "appearance-none rounded text-gray-700 w-full leading-tight bg-gray
 const textCenter = "appearance-none rounded text-gray-700 leading-tight text-center bg-gray-100 focus:shadow-inner focus:outline-none px-4 py-2 ";
 
 const disabled = {
-  plain: "disabled:cursor-not-allowed ",
   blue: "disabled:bg-blue-300 disabled:hover:bg-blue-300 disabled:cursor-not-allowed ",
   red: "disabled:bg-red-300 disabled:hover:bg-red-300 disabled:cursor-not-allowed ",
   green: "disabled:bg-green-300 disabled:hover:bg-green-300 disabled:cursor-not-allowed ",
@@ -11,7 +10,6 @@ const disabled = {
 }
 
 const hover = {
-  plain: "hover:",
   blue: "hover:bg-blue-500 ",
   red: "hover:bg-red-500 ",
   green: "hover:bg-green-500 ",
@@ -19,7 +17,6 @@ const hover = {
 }
 
 const button = {
-  plain: "appearance-none text-white font-bold rounded px-4 py-1 focus:outline-none ",
   blue: "appearance-none text-white font-bold bg-blue-400 rounded px-4 py-1 focus:outline-none " + hover.blue + disabled.blue,
   red: "appearance-none text-white font-bold bg-red-400 rounded px-4 py-1 focus:outline-none " + hover.red + disabled.red,
   green: "appearance-none text-white font-bold bg-green-400 rounded px-4 py-1 focus:outline-none " + hover.green + disabled.green,

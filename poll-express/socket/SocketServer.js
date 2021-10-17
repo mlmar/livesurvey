@@ -68,7 +68,6 @@ listen('JOIN_SURVEY', (socket, payload) => {
   if(!roomObj) return;
   socket.room = surveyID;
   roomObj.addUser(socket.id);
-  roomUtil.print();
   console.log("Client", `[${socket.id}]`, "joined room", payload.surveyID)
 });
 
@@ -86,7 +85,7 @@ listen('SET_QUESTION', (socket, payload) => {
   const { room, id } = socket;
   const { type } = payload;
   const roomObj = roomUtil.get(room);
-  if(!roomObj && roomObj.getHost() !==  id) return;
+  if(!roomObj && roomObj.getHost() !== id) return;
   if(type === "next") {
     roomObj.nextQuestion()
   } else if(type === "prev") {
