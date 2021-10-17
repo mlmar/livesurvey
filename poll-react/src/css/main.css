@@ -18,3 +18,15 @@ html, body, #root, .app {
 .app {
   overflow: auto;
 }
+
+.survey-controls {
+  justify-content: space-between;
+}
+
+.survey-controls > * {
+  flex-basis: 49%;
+}
+
+.chart .bar {
+  transition: width .4s ease;
+}

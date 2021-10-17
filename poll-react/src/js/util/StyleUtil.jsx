@@ -24,8 +24,9 @@ const button = {
 }
 
 const panel = "flex flex-col shadow-md p-8 py-10 bg-white rounded-md lg:w-1/2 md:w-9/12 w-11/12 ";
+const fullPanel = "flex flex-auto shadow-md p-8 py-10 bg-white rounded-md w-full "
 
 
-const styles = { label, text, textCenter, button, disabled, hover, panel };
+const styles = { label, text, textCenter, button, disabled, hover, panel, fullPanel };
 
 export default styles;

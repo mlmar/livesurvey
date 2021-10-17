@@ -8,7 +8,7 @@ class Room {
 
     this.title = survey.title;
     this.questions = survey.questions;
-    this.votes = survey.questions.map((question) => [...question.answers].fill(0));
+    this.votes = survey.questions.map(this.initPoll);
     this.index = 0;
 
     this.interval = null;
@@ -17,10 +17,6 @@ class Room {
 
   getID() {
     return this.id();
-  }
-
-  setHost(id) {
-    this.host = id;
   }
 
   getHost() {
@@ -41,6 +37,7 @@ class Room {
 
   getSurvey() {
     return { 
+      id: this.id,
       questions: this.questions,
       index: this.index
     }
@@ -64,9 +61,15 @@ class Room {
     return this.index;
   }
 
-  vote(voteIndex) {
-    if(this.votes?.[this.index]?.[voteIndex] && this.polling) 
-    this.votes[this.index][voteIndex]++;
+  vote(socketID, answerIndex) {
+    const poll = this.votes?.[this.index];
+    if(!poll?.[answerIndex] || !this.polling) return;
+    if(poll[answerIndex].has(socketID)) return;
+    for(let i = 0; i < poll.length; i++) {
+      poll[i].delete(socketID);
+    }
+    poll[answerIndex].add(socketID);
+    console.log(poll);
   }
 
   startPolling() {
@@ -78,17 +81,29 @@ class Room {
   }
 
   resetPoll() {
-    this.votes[this.index] = [...this.questions[this.index].answers].fill(0);
+    this.votes[this.index] = this.initPoll(this.questions[this.index]);
   }
 
-  getVotes() {
-    return this.votes;
+  initPoll(question) {
+    const ansArray = [];
+    for (let i = 0; i < question.answers.length; i++) {
+      ansArray.push(new Set());
+    }
+    return ansArray;
+  }
+
+  getVoteCounts() {
+    const votesArray = [];
+    for(let i = 0; i < this.votes.length; i++) {
+      votesArray.push(this.votes[i].map((set) => set.size));
+    }
+    return { max: this.users.size, counts: votesArray };
   }
 
   startInterval(callback, time) {
     if(this.interval) return;
     this.interval = setInterval(() => {
-      callback(this.votes);
+      callback(this.getVoteCounts());
     }, time);
   }
 

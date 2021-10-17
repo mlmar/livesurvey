@@ -1,13 +1,29 @@
-import { useState, useEffect } from "react";
-import SurveyAnswers from "./SurveyAnswers";
-import SurveyControls from "./SurveyControls";
-import socketUtil from '../../util/SocketUtil';
+import { useState, useEffect } from 'react';
+import SurveyAnswers from './SurveyAnswers';
+import SurveyControls from './SurveyControls';
+import socketUtil, { client } from '../../util/SocketUtil';
 
-const Survey = ({ host }) => {
-  const [survey, setSurvey] = useState({ questions: null, index: 0 });
+const Survey = ({ host, id }) => {
+  const [survey, setSurvey] = useState({ questions: null, index: 0, id: <> &mdash; </> });
+  const { questions, index } = survey;
+
+  const [votes, setVotes] = useState(null);
+
+  useEffect(() => {
+    client.emit('START_INTERVAL');
+
+    socketUtil.listen('SET_VOTES', setVotes);
+    return () => {
+      socketUtil.listen('SET_VOTES', null);
+    }
+  }, [])
+
   const [disabled, setDisabled] = useState(false);
 
-  const { questions, index } = survey;
+  useEffect(() => {
+    if(!host) client.emit('JOIN_SURVEY', { surveyID: id });
+  }, [host, id])
+
 
   // add listeners
   useEffect(() => {
@@ -24,7 +40,7 @@ const Survey = ({ host }) => {
     return <SurveyAnswers {...questions?.[index]} disabled={disabled}/>
   }
 
-  return <SurveyControls {...survey}/>
+  return <SurveyControls {...survey} votes={votes}/>
 }
 
 export default Survey;

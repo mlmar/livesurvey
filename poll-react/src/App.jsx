@@ -17,7 +17,6 @@ const reducer = (state, action) => {
       return { ...state, surveyID: payload.surveyID };
     }
     case "joinSurvey": {
-      client.emit('JOIN_SURVEY', { surveyID: state.surveyID });
       return { ...state, navIndex: 1 };
     }
     case "setHost": {
@@ -80,7 +79,7 @@ const App = () => {
   const getContent = () => {
     switch(navIndex) {
       case 1:
-        return <Survey host={host}/>
+        return <Survey host={host} id={surveyID}/>
       case 2: 
         return <Create/>
       default:
@@ -95,7 +94,7 @@ const App = () => {
   
 
   return (
-    <div className="app items-center bg-gray-50 py-16">
+    <div className="app items-center bg-gray-50 p-5">
       { connectionStatus == 2 ? (
           <SocketWrapper>
             {getContent()}
