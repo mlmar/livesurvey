@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "heroku-postbuild": "npm install --prefix poll-express",
-    "start": "npm run start --prefx poll-express"
+    "start": "npm run start --prefix poll-express"
   },
   "keywords": [],
   "author": "",
