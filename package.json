@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "heroku-postbuild": "npm install --prefix mouse-express",
     "start": "npm start --prefx poll-express"
   },
   "keywords": [],
