@@ -48,7 +48,7 @@ const SurveyControls = ({ questions, index, id, votes }) => {
             > &#10217; </button>
         </span>
       </div>
-      <Chart max={votes?.max} counts={votes?.counts?.[index]}/>
+      <Chart counts={votes?.counts?.[index]}/>
     </div>
   )
 }

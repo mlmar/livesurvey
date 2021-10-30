@@ -97,7 +97,7 @@ class Room {
     for(let i = 0; i < this.votes.length; i++) {
       votesArray.push(this.votes[i].map((set) => set.size));
     }
-    return { max: this.users.size, counts: votesArray };
+    return { counts: votesArray };
   }
 
   startInterval(callback, time) {

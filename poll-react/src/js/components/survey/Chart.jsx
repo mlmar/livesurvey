@@ -1,9 +1,20 @@
+import { useMemo } from "react";
 import colors from "../../util/ColorUtil";
 
 const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
+const getMaxLengths = (arr) => {
+  if(!arr) return;
+  let max = 0;
+  for(let i = 0; i < arr.length; i++) {
+    if(max < arr[i]) max = arr[i];
+  }
+  return max;
+}
 
-const Chart = ({ max, counts }) => {
+const Chart = ({ counts }) => {
+  const max = useMemo(() => getMaxLengths(counts), [counts]);
+
   return (
     <div className="flex flex-col chart">
       { counts?.map((count, i) => {
