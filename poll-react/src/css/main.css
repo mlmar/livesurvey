@@ -28,5 +28,15 @@ html, body, #root, .app {
 }
 
 .chart .bar {
+  position: relative;
   transition: width .4s ease;
+}
+
+.bar label {
+  position: absolute;
+  right: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 .5rem;
 }
